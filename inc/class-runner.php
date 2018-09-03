@@ -36,7 +36,8 @@ class Runner {
 		// Moved Hooks upper in the chain to allow for options hook
 		$this->hooks = new Hooks();
 		$defaults = [
-			'max_workers' => 4,
+			'max_workers' 	=> 4,
+			'debug_mode'	=> false,
 		];
 		// Merge hookable options with the default settings, merge hard coded options after.
 		$this->options = array_merge( $defaults, $this->hooks->run( 'Runner.initialize.options', $defaults ) );
@@ -118,7 +119,7 @@ class Runner {
 				sleep( LOOP_INTERVAL );
 				continue;
 			} */
-			
+
 			// Dont attempt to read jobs while no workers are available
 			// Removed the out of workers message, makes the log messy
 			while ( count( $this->workers ) === $this->options['max_workers'] ) {
@@ -276,7 +277,11 @@ class Runner {
 		$command = $this->get_job_command( $job );
 
 		$cwd = $this->wp_path;
-		printf( '[%d] Running %s (%s %s)' . PHP_EOL, $job->id, $command, $job->hook, $job->args );
+		if ( $this->options['debug_mode'] ) {
+			printf( '[%d] Running %s (%s %s)' . PHP_EOL, $job->id, $command, $job->hook, $job->args );
+		} else {
+			printf( '[%d] Running task: (%s %s)' . PHP_EOL, $job->id, $job->hook );
+		}
 
 		$spec = [
 			// We're intentionally avoiding adding a stdin pipe
@@ -299,10 +304,12 @@ class Runner {
 		stream_set_blocking( $pipes[1], false );
 		stream_set_blocking( $pipes[2], false );
 
-		$worker = new Worker( $process, $pipes, $job );
+		$worker = new Worker( $process, $pipes, $job, $this->options['debug_mode'] );
 		$this->workers[] = $worker;
 
-		printf( '[%d] Started worker' . PHP_EOL, $job->id );
+		if ( $this->options['debug_mode'] ) {
+			printf( '[%d] Started worker' . PHP_EOL, $job->id );
+		}
 
 		/**
 		 * Action after starting a new worker.
