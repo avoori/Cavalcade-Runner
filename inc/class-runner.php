@@ -33,11 +33,14 @@ class Runner {
 	protected static $instance;
 
 	public function __construct( $options = [] ) {
+		// Moved Hooks upper in the chain to allow for options hook
+		$this->hooks = new Hooks();
 		$defaults = [
 			'max_workers' => 4,
 		];
+		// Merge hookable options with the default settings, merge hard coded options after.
+		$this->options = array_merge( $defaults, $this->hooks->run( 'Runner.initialize.options', $defaults ) );
 		$this->options = array_merge( $defaults, $options );
-		$this->hooks = new Hooks();
 	}
 
 	/**
@@ -109,11 +112,17 @@ class Runner {
 			$this->check_workers();
 
 			// Do we have workers to spare?
-			if ( count( $this->workers ) === $this->options['max_workers'] ) {
+			/* if ( count( $this->workers ) === $this->options['max_workers'] ) {
 				// At maximum workers, wait a cycle
 				printf( '[  ] Out of workers' . PHP_EOL );
 				sleep( LOOP_INTERVAL );
 				continue;
+			} */
+			
+			// Dont attempt to read jobs while no workers are available
+			// Removed the out of workers message, makes the log messy
+			while ( count( $this->workers ) === $this->options['max_workers'] ) {
+				sleep( LOOP_INTERVAL );
 			}
 
 			// Find any new jobs, or wait for one
@@ -202,7 +211,14 @@ class Runner {
 		 * @param string $password Password for the connection.
 		 */
 		$options = $this->hooks->run( 'Runner.connect_to_db.options', [], $dsn, DB_USER, DB_PASSWORD );
-		$this->db = new PDO( $dsn, DB_USER, DB_PASSWORD, $options );
+		
+		// Added the credentials hook to allow for database username and password override
+		$credentials = $this->hooks->run( 'Runner.connect_to_db.credentials', [
+			'username'	=> DB_USER,
+			'password'	=> DB_PASSWORD,
+		], DB_USER, DB_PASSWORD );
+
+		$this->db = new PDO( $dsn, $credentials['username'], $credentials['password'], $options );
 
 		// Set it up just how we like it
 		$this->db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
