@@ -280,7 +280,7 @@ class Runner {
 		if ( $this->options['debug_mode'] ) {
 			printf( '[%d] Running %s (%s %s)' . PHP_EOL, $job->id, $command, $job->hook, $job->args );
 		} else {
-			printf( '[%d] Running task: (%s %s)' . PHP_EOL, $job->id, $job->hook );
+			printf( '[%d] Running task: %s' . PHP_EOL, $job->id, $job->hook );
 		}
 
 		$spec = [
