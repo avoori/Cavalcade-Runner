@@ -2,6 +2,7 @@
 - Created an array of database credentials instead of using define's from wp-config.php, added a hook to change it.
 - Modifed the job runner to minimize database connections. The runner now waits until workers are available.
 - Modified the construct of the Runner. Hooks are now loaded first, to allow for max workers hook.
+- Removed the out of workers message.
 
 ## Hooks added
 - `Runner.initialize.options` - Modify an options array. Used to modify the maximum number of workers.
