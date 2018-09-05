@@ -33,15 +33,12 @@ class Runner {
 	protected static $instance;
 
 	public function __construct( $options = [] ) {
-		// Moved Hooks upper in the chain to allow for options hook
-		$this->hooks = new Hooks();
 		$defaults = [
 			'max_workers' 	=> 4,
 			'debug_mode'	=> false,
 		];
-		// Merge hookable options with the default settings, merge hard coded options after.
-		$this->options = array_merge( $defaults, $this->hooks->run( 'Runner.initialize.options', $defaults ) );
-		$this->options = array_merge( $this->options, $options );
+		$this->hooks = new Hooks();
+		$this->options = array_merge( $defaults, $options );
 	}
 
 	/**
@@ -81,6 +78,13 @@ class Runner {
 
 		include $config_path;
 		$this->table_prefix = isset( $table_prefix ) ? $table_prefix : 'wp_';
+		
+		/**
+		 * Filter the runner options after hooking into wp-config.php
+		 *
+		 * @param array $this->options Array of runner options used by cavalcade.
+		 */
+		$this->options = array_merge( $this->options, $this->hooks->run( 'Runner.initialize.options', $this->options ) );
 
 		/**
 		 * Filter the table prefix from the configuration.
