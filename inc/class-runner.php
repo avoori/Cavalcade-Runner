@@ -124,6 +124,7 @@ class Runner {
 			// Removed the out of workers message, makes the log messy
 			while ( count( $this->workers ) === $this->options['max_workers'] ) {
 				sleep( LOOP_INTERVAL );
+				$this->check_workers();
 			}
 
 			// Find any new jobs, or wait for one
