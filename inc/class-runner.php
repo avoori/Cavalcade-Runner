@@ -41,7 +41,7 @@ class Runner {
 		];
 		// Merge hookable options with the default settings, merge hard coded options after.
 		$this->options = array_merge( $defaults, $this->hooks->run( 'Runner.initialize.options', $defaults ) );
-		$this->options = array_merge( $defaults, $options );
+		$this->options = array_merge( $this->options, $options );
 	}
 
 	/**
