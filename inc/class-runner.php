@@ -247,10 +247,7 @@ class Runner {
 	 * @return stdClass|null
 	 */
 	protected function get_next_job() {
-		$query = "SELECT * FROM {$this->table_prefix}cavalcade_jobs";
-		$query .= ' WHERE nextrun < NOW() AND status = "waiting"';
-		$query .= ' ORDER BY nextrun ASC';
-		$query .= ' LIMIT 1';
+		$query = "SELECT * FROM {$this->table_prefix}cavalcade_jobs WHERE nextrun < NOW() AND status = 'waiting' ORDER BY nextrun ASC LIMIT 1";
 
 		/**
 		 * Filter for the next job query.

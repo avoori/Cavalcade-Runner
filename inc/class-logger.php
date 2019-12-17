@@ -20,8 +20,7 @@ class Logger {
 	}
 
 	protected function log_run( $job_id, $status, $message = '' ) {
-		$query = "INSERT INTO {$this->table_prefix}cavalcade_logs (`job`, `status`, `timestamp`, `content`)";
-		$query .= ' values( :job, :status, :timestamp, :content )';
+		$query = "INSERT INTO {$this->table_prefix}cavalcade_logs (`job`, `status`, `timestamp`, `content`) values( :job, :status, :timestamp, :content )";
 
 		$statement = $this->db->prepare( $query );
 		$statement->bindValue( ':job', $job_id );
